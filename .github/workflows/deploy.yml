@@ -1,37 +1,51 @@
-name: Deploy to Server
+name: Frontend CI/CD
+
+# Запускаем пайплайн при каждом пуше в ветку main
 on:
   push:
     branches:
-      - main
+      - main 
+
 jobs:
-  # === ЭТАП 1: ТЕСТИРОВАНИЕ ===
+  # ==========================================
+  # ЭТАП 1: ТЕСТИРОВАНИЕ КОДА В ИЗОЛЯЦИИ
+  # ==========================================
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Скачиваем код из репозитория
+      - name: Скачиваем свежий код
         uses: actions/checkout@v4
 
-      - name: Настраиваем Node.js
+      - name: Устанавливаем Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Укажи свою версию ноды
+          node-version: '20'
 
-      - name: Устанавливаем пакеты
+      - name: Ставим NPM пакеты
         run: npm install
 
-      - name: Запускаем тесты
-        run: npm run test # <-- Если команда выдаст ошибку, всё остановится!
+      - name: Прогоняем тесты (Vitest)
+        run: npm run test
 
+  # ==========================================
+  # ЭТАП 2: ДЕПЛОЙ НА ТВОЙ СЕРВЕР
+  # ==========================================
   deploy:
+    needs: test # <-- МАГИЯ ЗДЕСЬ: Ждем успешного завершения блока test!
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
+      - name: Подключаемся по SSH и обновляем контейнеры
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            # 1. Заходим в папку фронта на сервере
             cd /root/luminary/frontend
+            
+            # 2. Стягиваем новые изменения
             git pull origin main
+            
+            # 3. Пересобираем и запускаем докер
             docker compose up -d --build
