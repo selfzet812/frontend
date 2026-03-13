@@ -3,8 +3,25 @@ on:
   push:
     branches:
       - main
-
 jobs:
+  # === ЭТАП 1: ТЕСТИРОВАНИЕ ===
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Скачиваем код из репозитория
+        uses: actions/checkout@v4
+
+      - name: Настраиваем Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Укажи свою версию ноды
+
+      - name: Устанавливаем пакеты
+        run: npm install
+
+      - name: Запускаем тесты
+        run: npm run test # <-- Если команда выдаст ошибку, всё остановится!
+
   deploy:
     runs-on: ubuntu-latest
     steps:
