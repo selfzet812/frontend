@@ -24,14 +24,8 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route
-          path="/login"
-          element={<GuestRoute><Login /></GuestRoute>}
-        />
-        <Route
-          path="/register"
-          element={<GuestRoute><Register /></GuestRoute>}
-        />
+        <Route path="/login"    element={<GuestRoute><Login /></GuestRoute>} />
+        <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/notes"     element={<ProtectedRoute><Notes /></ProtectedRoute>} />
